@@ -2,8 +2,10 @@ package com.wufel.cleaning.robot.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan(basePackages = "com.wufel.cleaning.robot.application")
 public class Application {
 
 	public static void main(String[] args) {
