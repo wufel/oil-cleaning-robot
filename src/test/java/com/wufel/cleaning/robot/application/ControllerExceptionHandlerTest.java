@@ -35,6 +35,7 @@ public class ControllerExceptionHandlerTest {
     private static final String INVALID_NAVITGATION_ERROR_MESSAGE = "[{\"field\":\"navigationInstructions\",\"message\":\"Invalid Navigation String\"}]";
     private static final String INVALID_COORDINATE_ERROR_MESSAGE = "\"message\":\"Array an Invalid Coordinate\"";
     private static final String INVALID_OIL_PATCHES_ERROR_MESSAGE = "[{\"field\":\"oilPatches\",\"message\":\"Item In Array Not a Valid Coordination\"}]";
+    private static final String OUT_OF_BOUNDARY_ERROR_MESSAGE = "is out of cleaning boundary";
     public static final String VALID_CLEAN_OUTPUT = "{\n" +
             "  \"finalPosition\" : [1, 3],\n" +
             "  \"oilPatchesCleaned\" : 1\n" +
@@ -127,6 +128,26 @@ public class ControllerExceptionHandlerTest {
         mockMvc.perform(CLEAN_REQUEST_BUILDER.content(cleaningInstructionString))
                 .andExpect(status().isOk())
                 .andExpect(content().json(VALID_CLEAN_OUTPUT));
-
     }
+
+    private static Stream<Arguments> outOfBoundaryParams() {
+        return Stream.of(
+                Arguments.of(new int[]{1, 1}, new int[]{1, 1}, new int[][]{{1, 1}}),
+                Arguments.of(new int[]{1, 1}, new int[]{1, 0}, new int[][]{{1, 1}}),
+                Arguments.of(new int[]{1, 1}, new int[]{0, 0}, new int[][]{{1, 1}}),
+                Arguments.of(new int[]{100, 100}, new int[]{100, 99}, new int[][]{{1, 1}})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("outOfBoundaryParams")
+    public void outOfBoundaryExceptionTest(int[] areaSize, int[] startingPosition, int[][] oilPatches) throws Exception {
+        CleaningInstruction cleaningInstruction = new CleaningInstruction(areaSize, startingPosition, oilPatches, "N");
+        String cleaningInstructionString = mapper.writeValueAsString(cleaningInstruction);
+
+        mockMvc.perform(CLEAN_REQUEST_BUILDER.content(cleaningInstructionString))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(OUT_OF_BOUNDARY_ERROR_MESSAGE)));
+    }
+
 }

@@ -40,6 +40,7 @@ public class OilCleaningRobotTest {
         service = new OilCleaningService();
         boundary = new int[]{100, 100};
     }
+
     @Test
     public void navigateAndCleanProperly() throws JsonProcessingException {
         CleaningInstruction instruction = objectMapper.readValue(BASIC_CASE_REQUEST, CleaningInstruction.class);
