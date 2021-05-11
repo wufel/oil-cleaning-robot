@@ -43,7 +43,7 @@ public class OilCleaningService {
         return output;
     }
 
-    public Coordinate move(CleaningOutput output, Coordinate boundary, Direction direction) {
+    private Coordinate move(CleaningOutput output, Coordinate boundary, Direction direction) {
         Coordinate originalCoordinate = new Coordinate(output.getFinalPosition());
         Coordinate movedCoordinate = new Coordinate(originalCoordinate.getX() + direction.getDirectionX(),
                 originalCoordinate.getY() + direction.getDirectionY());
@@ -51,7 +51,7 @@ public class OilCleaningService {
         return movedCoordinate;
     }
 
-    public void clean(Coordinate coordinate, Set<Coordinate> oilPatches, CleaningOutput output) {
+    private void clean(Coordinate coordinate, Set<Coordinate> oilPatches, CleaningOutput output) {
         output.setFinalPosition(coordinate.toArray());
         if (oilPatches.contains(coordinate)) {
             LOG.info("cleaning patch {}", coordinate);

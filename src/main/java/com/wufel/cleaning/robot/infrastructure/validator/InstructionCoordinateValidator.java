@@ -1,12 +1,10 @@
 package com.wufel.cleaning.robot.infrastructure.validator;
 
 import com.wufel.cleaning.robot.domain.annotation.CoordinateConstraint;
-import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-@Component
 public class InstructionCoordinateValidator implements ConstraintValidator<CoordinateConstraint, int[]> {
 
     @Override

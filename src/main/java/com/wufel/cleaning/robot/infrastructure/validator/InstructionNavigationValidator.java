@@ -2,14 +2,12 @@ package com.wufel.cleaning.robot.infrastructure.validator;
 
 import com.wufel.cleaning.robot.domain.annotation.NavigationStringConstraint;
 import com.wufel.cleaning.robot.domain.entity.Direction;
-import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.Objects;
 
-@Component
 public class InstructionNavigationValidator implements ConstraintValidator<NavigationStringConstraint, String> {
 
     @Override
