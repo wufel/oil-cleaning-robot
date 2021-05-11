@@ -4,7 +4,6 @@ import com.wufel.cleaning.robot.domain.entity.CleaningInstruction;
 import com.wufel.cleaning.robot.domain.entity.CleaningOutput;
 import com.wufel.cleaning.robot.domain.entity.Coordinate;
 import com.wufel.cleaning.robot.domain.entity.Direction;
-import com.wufel.cleaning.robot.domain.exception.OutOfCleaningBoundaryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,25 +13,26 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.wufel.cleaning.robot.infrastructure.util.Utils.checkBoundary;
+
 @Service
 public class OilCleaningService {
 
     public static Logger LOG = LoggerFactory.getLogger(OilCleaningService.class);
 
-    public OilCleaningService() {
-    }
-
     public CleaningOutput navigateAndClean(CleaningInstruction instruction) {
-
-        LOG.info("Cleaning process starts");
-        Coordinate startingPosition = new Coordinate(instruction.getStartingPosition());
-        CleaningOutput output = new CleaningOutput(startingPosition.toArray());
+        LOG.info("Preparing cleaning process...");
+        Coordinate currentPosition = new Coordinate(instruction.getStartingPosition());
+        CleaningOutput output = new CleaningOutput(currentPosition.toArray());
         Coordinate boundary = new Coordinate(instruction.getAreaSize());
+
+        //assumption on there will be no duplicated oil patches provided
         Set<Coordinate> oilPatches = Arrays.stream(instruction.getOilPatches())
                 .map(Coordinate::new)
                 .collect(Collectors.toSet());
-        checkBoundary(startingPosition, boundary);
+        checkBoundary(currentPosition, boundary);
 
+        LOG.info("Begin to move and clean");
         Stream.of(instruction.getNavigationInstructions().split(""))
                 .map(Direction::valueOf)
                 .map(direction -> move(output, boundary, direction))
@@ -43,22 +43,12 @@ public class OilCleaningService {
         return output;
     }
 
-
     public Coordinate move(CleaningOutput output, Coordinate boundary, Direction direction) {
         Coordinate originalCoordinate = new Coordinate(output.getFinalPosition());
         Coordinate movedCoordinate = new Coordinate(originalCoordinate.getX() + direction.getDirectionX(),
                 originalCoordinate.getY() + direction.getDirectionY());
         checkBoundary(movedCoordinate, boundary);
         return movedCoordinate;
-    }
-
-    public void checkBoundary(Coordinate location, Coordinate boundary) {
-        if (boundary.getX() <= location.getX()
-                || boundary.getY() <= location.getY()
-                || location.getX() < 0
-                || location.getY() < 0) {
-            throw new OutOfCleaningBoundaryException(String.format("location %s is out of cleaning boundary", location.toString()));
-        }
     }
 
     public void clean(Coordinate coordinate, Set<Coordinate> oilPatches, CleaningOutput output) {

@@ -1,8 +1,8 @@
 package com.wufel.cleaning.robot.domain.entity;
 
 public class Coordinate extends Entity {
-    private int x;
-    private int y;
+    private final int x;
+    private final int y;
 
     public Coordinate(int[] coordinates) {
         this.x = coordinates[0];
@@ -21,7 +21,6 @@ public class Coordinate extends Entity {
     public int getX() {
         return x;
     }
-
 
     public int getY() {
         return y;

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -29,6 +30,11 @@ class ControllerTest {
                     .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                     .accept(APPLICATION_JSON);
 
+    private static final MockHttpServletRequestBuilder CLEAN_WITH_ROBOT_REQUEST_BUILDER =
+            request(HttpMethod.GET, "/robotClean")
+                    .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .accept(APPLICATION_JSON);
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -47,6 +53,16 @@ class ControllerTest {
         CleaningOutput expectedOutput = new CleaningOutput(new int[]{1, 3}, 1);
         String expectedOutputString = objectMapper.writeValueAsString(expectedOutput);
         mockMvc.perform(CLEAN_REQUEST_BUILDER.content(BASIC_CASE_REQUEST))
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedOutputString));
+    }
+
+    @Test
+    void testRobotCleanReturnSameResult() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        CleaningOutput expectedOutput = new CleaningOutput(new int[]{1, 3}, 1);
+        String expectedOutputString = objectMapper.writeValueAsString(expectedOutput);
+        mockMvc.perform(CLEAN_WITH_ROBOT_REQUEST_BUILDER.content(BASIC_CASE_REQUEST))
                 .andExpect(status().isOk())
                 .andExpect(content().string(expectedOutputString));
     }

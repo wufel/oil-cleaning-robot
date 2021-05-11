@@ -30,4 +30,10 @@ public class Controller {
         return cleaningService.navigateAndClean(instruction);
     }
 
+    @GetMapping("/robotClean")
+    public CleaningOutput navigateAndCleanByRobot(@Valid @RequestBody CleaningInstruction instruction) {
+        OilCleaningRobot oilCleaningRobot = new OilCleaningRobot(instruction);
+        return oilCleaningRobot.navigateAndClean();
+    }
+
 }

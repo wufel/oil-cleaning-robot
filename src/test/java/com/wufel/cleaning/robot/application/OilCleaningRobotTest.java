@@ -23,7 +23,7 @@ import static com.wufel.cleaning.robot.domain.entity.Direction.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class OilCleaningServiceTest {
+public class OilCleaningRobotTest {
 
     private static final String BASIC_CASE_REQUEST =
             "{\"areaSize\": [5, 5], \"startingPosition\": [1, 2], \"oilPatches\": [[1, 0], [2, 2], [2, 3]], \"navigationInstructions\": \"NNESEESWNWW\"}";
@@ -40,20 +40,20 @@ public class OilCleaningServiceTest {
         service = new OilCleaningService();
         boundary = new int[]{100, 100};
     }
-
     @Test
     public void navigateAndCleanProperly() throws JsonProcessingException {
         CleaningInstruction instruction = objectMapper.readValue(BASIC_CASE_REQUEST, CleaningInstruction.class);
         CleaningOutput expectedOutput = new CleaningOutput(new int[]{1, 3}, 1);
-
-        CleaningOutput cleaningOutput = service.navigateAndClean(instruction);
+        OilCleaningRobot oilCleaningRobot = new OilCleaningRobot(instruction);
+        CleaningOutput cleaningOutput = oilCleaningRobot.navigateAndClean();
         assertEquals(expectedOutput, cleaningOutput);
     }
 
     @Test
     public void cleaningOutOfBoundary() throws JsonProcessingException {
         CleaningInstruction instruction = objectMapper.readValue(OUT_OF_BOUNDARY_CASE_REQUEST, CleaningInstruction.class);
-        assertThrows(OutOfCleaningBoundaryException.class, () -> service.navigateAndClean(instruction));
+        OilCleaningRobot oilCleaningRobot = new OilCleaningRobot(instruction);
+        assertThrows(OutOfCleaningBoundaryException.class, oilCleaningRobot::navigateAndClean);
     }
 
     private static Stream<Arguments> moveCorrectlyParams() {
@@ -69,9 +69,9 @@ public class OilCleaningServiceTest {
     @MethodSource("moveCorrectlyParams")
     public void moveCorrectly(Direction direction, Coordinate initial, Coordinate expected) {
         CleaningInstruction cleaningInstruction = new CleaningInstruction(boundary, initial.toArray(), new int[1][2], direction.toString());
-
-        CleaningOutput output = service.navigateAndClean(cleaningInstruction);
-        Coordinate actual = new Coordinate(output.getFinalPosition());
+        OilCleaningRobot oilCleaningRobot = new OilCleaningRobot(cleaningInstruction);
+        CleaningOutput cleaningOutput = oilCleaningRobot.navigateAndClean();
+        Coordinate actual = new Coordinate(cleaningOutput.getFinalPosition());
         assertEquals(expected, actual);
     }
 
@@ -91,7 +91,8 @@ public class OilCleaningServiceTest {
         oilPatches.stream().map(Coordinate::toArray).collect(Collectors.toList()).toArray(oilPatchesArray);
         CleaningInstruction cleaningInstruction = new CleaningInstruction(boundary, location.toArray(), oilPatchesArray, E.toString());
 
-        CleaningOutput output = service.navigateAndClean(cleaningInstruction);
-        assertEquals(expectedPatchesCleaned, output.getOilPatchesCleaned());
+        OilCleaningRobot oilCleaningRobot = new OilCleaningRobot(cleaningInstruction);
+        CleaningOutput cleaningOutput = oilCleaningRobot.navigateAndClean();
+        assertEquals(expectedPatchesCleaned, cleaningOutput.getOilPatchesCleaned());
     }
 }
